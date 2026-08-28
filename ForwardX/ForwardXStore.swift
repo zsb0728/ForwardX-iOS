@@ -45,6 +45,29 @@ final class ForwardXStore {
         catch { self.error = friendly(error) }
     }
 
+    func execute(_ path: String, inputText: String, mutation: Bool) async throws -> String {
+        let data = inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? Data("null".utf8) : Data(inputText.utf8)
+        let input = try JSONDecoder().decode(JSONValue.self, from: data)
+        let value = try await request(path, input: input, mutation: mutation)
+        let output = try JSONEncoder.pretty.encode(value)
+        return String(data: output, encoding: .utf8) ?? "完成"
+    }
+
+    func delete(_ kind: ItemKind, item: FXItem) async {
+        guard let id = Double(item.id) else { return }
+        let path = kind == .hosts ? "hosts.delete" : kind == .rules ? "rules.delete" : "tunnels.delete"
+        do { _ = try await request(path, input: .object(["id": .number(id)]), mutation: true); await refresh() }
+        catch { self.error = friendly(error) }
+    }
+
+    func update(_ kind: ItemKind, item: FXItem, fields: [String: JSONValue]) async -> Bool {
+        guard let id = Double(item.id) else { return false }
+        var payload = fields; payload["id"] = .number(id)
+        let path = kind == .hosts ? "hosts.update" : kind == .rules ? "rules.update" : "tunnels.update"
+        do { _ = try await request(path, input: .object(payload), mutation: true); await refresh(); return true }
+        catch { self.error = friendly(error); return false }
+    }
+
     func logout() { token = ""; user = [:]; hosts=[]; rules=[]; tunnels=[]; UserDefaults.standard.removeObject(forKey:"fx.token") }
     private func pageInput() -> JSONValue { .object(["page":.number(1),"pageSize":.number(50),"search":.string("")]) }
     private func items(_ value: JSONValue) -> [FXItem] { let list: [JSONValue] = value.object?["items"]?.array ?? value.array ?? []; return list.enumerated().map { FXItem($0.element, index: $0.offset) } }
@@ -69,3 +92,7 @@ final class ForwardXStore {
     private func friendly(_ e:Error)->String { let s=errorText(e); return s.contains("用户名或密码") ? "用户名或密码错误":s }
 }
 enum FXError: Error { case message(String) }
+
+extension JSONEncoder {
+    static var pretty: JSONEncoder { let e = JSONEncoder(); e.outputFormatting = [.prettyPrinted, .sortedKeys, .withoutEscapingSlashes]; return e }
+}

@@ -3,10 +3,10 @@ import SwiftUI
 struct GlassCard<Content: View>: View {
     @ViewBuilder var content: Content
     var body: some View {
-        content.padding(18).frame(maxWidth:.infinity,alignment:.leading)
-            .background(.ultraThinMaterial,in:RoundedRectangle(cornerRadius:26,style:.continuous))
-            .overlay(RoundedRectangle(cornerRadius:26).stroke(.white.opacity(0.18)))
-            .shadow(color:.black.opacity(0.07),radius:18,y:9)
+        content.padding(13).frame(maxWidth:.infinity,alignment:.leading)
+            .background(.ultraThinMaterial,in:RoundedRectangle(cornerRadius:20,style:.continuous))
+            .overlay(RoundedRectangle(cornerRadius:20).stroke(.white.opacity(0.18)))
+            .shadow(color:.black.opacity(0.07),radius:12,y:5)
     }
 }
 
@@ -21,12 +21,12 @@ struct StatusPill: View {
 
 struct MetricCard: View {
     let title:String, value:String, icon:String, color:Color
-    var body: some View { GlassCard { VStack(alignment:.leading,spacing:12) { Image(systemName:icon).font(.title2).foregroundStyle(color); Text(value).font(.title2.bold()).lineLimit(1).minimumScaleFactor(0.7); Text(title).font(.caption).foregroundStyle(.secondary) } } }
+    var body: some View { GlassCard { VStack(alignment:.leading,spacing:12) { Image(systemName:icon).font(.headline).foregroundStyle(color); Text(value).font(.title2.bold()).lineLimit(1).minimumScaleFactor(0.7); Text(title).font(.caption).foregroundStyle(.secondary) } } }
 }
 
 struct EmptyState: View {
     let icon:String,title:String,detail:String
-    var body: some View { VStack(spacing:14) { Image(systemName:icon).font(.system(size:44)).foregroundStyle(.secondary); Text(title).font(.headline); Text(detail).font(.subheadline).foregroundStyle(.secondary).multilineTextAlignment(.center) }.frame(maxWidth:.infinity).padding(50) }
+    var body: some View { VStack(spacing:10) { Image(systemName:icon).font(.system(size:44)).foregroundStyle(.secondary); Text(title).font(.headline); Text(detail).font(.subheadline).foregroundStyle(.secondary).multilineTextAlignment(.center) }.frame(maxWidth:.infinity).padding(50) }
 }
 
 struct GlassButtonModifier: ViewModifier {
