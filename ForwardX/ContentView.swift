@@ -10,11 +10,11 @@ struct LoginView: View {
     @State private var username="", password=""
     var body: some View { ScrollView { VStack(spacing:28) {
         Spacer().frame(height:60)
-        Image("AppIconImage").resizable().scaledToFit().frame(width:92,height:92).clipShape(RoundedRectangle(cornerRadius:24)).shadow(color:.blue.opacity(.25),radius:24,y:12)
+        Image("AppIconImage").resizable().scaledToFit().frame(width:92,height:92).clipShape(RoundedRectangle(cornerRadius:24)).shadow(color:.blue.opacity(0.25),radius:24,y:12)
         VStack(spacing:6){Text("ForwardX").font(.largeTitle.bold());Text("掌控每一条链路").foregroundStyle(.secondary)}
         GlassCard { VStack(spacing:18) {
-            TextField("用户名或邮箱",text:$username).textContentType(.username).textInputAutocapitalization(.never).padding().background(.white.opacity(.08),in:RoundedRectangle(cornerRadius:16))
-            SecureField("密码",text:$password).textContentType(.password).padding().background(.white.opacity(.08),in:RoundedRectangle(cornerRadius:16))
+            TextField("用户名或邮箱",text:$username).textContentType(.username).textInputAutocapitalization(.never).padding().background(.white.opacity(0.08),in:RoundedRectangle(cornerRadius:16))
+            SecureField("密码",text:$password).textContentType(.password).padding().background(.white.opacity(0.08),in:RoundedRectangle(cornerRadius:16))
             Button { Task { _ = await store.login(username:username,password:password) } } label: { HStack { if store.loading { ProgressView().tint(.white) }; Text(store.loading ? "正在连接":"登录").bold() }.frame(maxWidth:.infinity).padding().foregroundStyle(.white).background(.blue.gradient,in:Capsule()) }.disabled(username.isEmpty || password.isEmpty || store.loading)
         }}
         Text("安全连接 · vps.na21.icu").font(.caption).foregroundStyle(.secondary)
@@ -42,4 +42,4 @@ struct DashboardView: View {
         GlassCard { VStack(alignment:.leading,spacing:12){Text("快捷入口").font(.headline);HStack{Quick(icon:"plus",title:"新建规则",color:.blue);Quick(icon:"link",title:"链路",color:.purple);Quick(icon:"chart.xyaxis.line",title:"流量",color:.cyan)} } }
     }.padding() }.navigationTitle("概览").toolbarBackground(.hidden,for:.navigationBar).refreshable{await store.refresh()} }
 }
-struct Quick:View{let icon,title:String;let color:Color;var body:some View{VStack(spacing:8){Image(systemName:icon).font(.title2).foregroundStyle(color).frame(width:48,height:48).background(color.opacity(.12),in:Circle());Text(title).font(.caption)}.frame(maxWidth:.infinity)}}
+struct Quick:View{let icon,title:String;let color:Color;var body:some View{VStack(spacing:8){Image(systemName:icon).font(.title2).foregroundStyle(color).frame(width:48,height:48).background(color.opacity(0.12),in:Circle());Text(title).font(.caption)}.frame(maxWidth:.infinity)}}
