@@ -47,7 +47,7 @@ final class ForwardXStore {
 
     func logout() { token = ""; user = [:]; hosts=[]; rules=[]; tunnels=[]; UserDefaults.standard.removeObject(forKey:"fx.token") }
     private func pageInput() -> JSONValue { .object(["page":.number(1),"pageSize":.number(50),"search":.string("")]) }
-    private func items(_ value: JSONValue) -> [FXItem] { let list: [JSONValue] = value.object?["items"]?.array ?? value.array ?? []; return list.enumerated().map(FXItem.init) }
+    private func items(_ value: JSONValue) -> [FXItem] { let list: [JSONValue] = value.object?["items"]?.array ?? value.array ?? []; return list.enumerated().map { FXItem($0.element, index: $0.offset) } }
 
     private func request(_ path: String, input: JSONValue? = nil, mutation: Bool = false, authorized: Bool = true) async throws -> JSONValue {
         var url = panel.appending(path: "api/trpc/\(path)")
