@@ -8,8 +8,11 @@ final class ForwardXStore {
     var user: [String: JSONValue] = [:]
     var stats: [String: JSONValue] = [:]
     var traffic: [String: JSONValue] = [:]
-    var hosts: [FXItem] = [], rules: [FXItem] = [], tunnels: [FXItem] = []
-    var loading = false, error = ""
+    var hosts: [FXItem] = []
+    var rules: [FXItem] = []
+    var tunnels: [FXItem] = []
+    var loading = false
+    var error = ""
     var signedIn: Bool { !token.isEmpty }
 
     func login(username: String, password: String) async -> Bool {
@@ -44,7 +47,7 @@ final class ForwardXStore {
 
     func logout() { token = ""; user = [:]; hosts=[]; rules=[]; tunnels=[]; UserDefaults.standard.removeObject(forKey:"fx.token") }
     private func pageInput() -> JSONValue { .object(["page":.number(1),"pageSize":.number(50),"search":.string("")]) }
-    private func items(_ value: JSONValue) -> [FXItem] { (value.object?["items"]?.array ?? value.array ?? []).enumerated().map(FXItem.init) }
+    private func items(_ value: JSONValue) -> [FXItem] { let list: [JSONValue] = value.object?["items"]?.array ?? value.array ?? []; return list.enumerated().map(FXItem.init) }
 
     private func request(_ path: String, input: JSONValue? = nil, mutation: Bool = false, authorized: Bool = true) async throws -> JSONValue {
         var url = panel.appending(path: "api/trpc/\(path)")

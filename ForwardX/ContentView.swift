@@ -7,7 +7,8 @@ struct ContentView: View {
 
 struct LoginView: View {
     @Bindable var store:ForwardXStore
-    @State private var username="", password=""
+    @State private var username = ""
+    @State private var password = ""
     var body: some View { ScrollView { VStack(spacing:28) {
         Spacer().frame(height:60)
         Image("AppIconImage").resizable().scaledToFit().frame(width:92,height:92).clipShape(RoundedRectangle(cornerRadius:24)).shadow(color:.blue.opacity(0.25),radius:24,y:12)
