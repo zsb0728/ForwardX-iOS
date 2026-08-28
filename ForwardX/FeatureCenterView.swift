@@ -11,11 +11,7 @@ struct FeatureCenterView: View {
                 Section(moduleTitle(module)) {
                     ForEach(filtered.filter { $0.module == module }) { op in
                         NavigationLink { OperationView(store: store, operation: op) } label: {
-                            HStack(spacing: 10) {
-                                Image(systemName: moduleIcon(module)).foregroundStyle(.blue).frame(width: 22)
-                                VStack(alignment: .leading, spacing: 2) { Text(operationTitle(op.name)).font(.subheadline); Text(op.path).font(.caption2).foregroundStyle(.secondary) }
-                                Spacer(); Text(op.mutation ? "操作" : "查询").font(.caption2.bold()).foregroundStyle(op.mutation ? .orange : .cyan)
-                            }.padding(.vertical, 2)
+                            OperationRow(operation: op, module: module)
                         }
                     }
                 }
@@ -24,9 +20,23 @@ struct FeatureCenterView: View {
     }
 }
 
+struct OperationRow: View {
+    let operation: FXOperation; let module: String
+    var body: some View {
+        HStack(spacing: 10) {
+            Image(systemName: moduleIcon(module)).foregroundStyle(.blue).frame(width: 22)
+            VStack(alignment: .leading, spacing: 2) { Text(operationTitle(operation.name)).font(.subheadline); Text(operation.path).font(.caption2).foregroundStyle(.secondary) }
+            Spacer()
+            Text(operation.mutation ? "操作" : "查询").font(.caption2.bold()).foregroundStyle(operation.mutation ? Color.orange : Color.cyan)
+        }.padding(.vertical, 2)
+    }
+}
+
 struct OperationView: View {
     @Bindable var store: ForwardXStore; let operation: FXOperation
-    @State private var input = "{}", output = "", running = false
+    @State private var input = "{}"
+    @State private var output = ""
+    @State private var running = false
     var body: some View {
         Form {
             Section("接口") { LabeledContent("功能", value: operationTitle(operation.name)); LabeledContent("路径", value: operation.path); LabeledContent("类型", value: operation.mutation ? "写入操作" : "数据查询") }

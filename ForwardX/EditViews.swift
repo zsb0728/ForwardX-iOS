@@ -3,7 +3,10 @@ import SwiftUI
 struct CompactEditView: View {
     @Bindable var store: ForwardXStore; let kind: ItemKind; let item: FXItem
     @Environment(\.dismiss) private var dismiss
-    @State private var name = "", address = "", targetPort = "", listenPort = ""
+    @State private var name = ""
+    @State private var address = ""
+    @State private var targetPort = ""
+    @State private var listenPort = ""
     var body: some View {
         Form {
             Section("基本信息") {
