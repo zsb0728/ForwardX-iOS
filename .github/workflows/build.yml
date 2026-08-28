@@ -1,0 +1,24 @@
+name: Build unsigned ForwardX IPA
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+jobs:
+  build:
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install XcodeGen
+        run: brew install xcodegen
+      - name: Generate project
+        run: xcodegen generate
+      - name: Build unsigned app
+        run: |
+          xcodebuild -project ForwardX.xcodeproj -scheme ForwardX -configuration Release -sdk iphoneos -derivedDataPath build CODE_SIGNING_ALLOWED=NO
+          mkdir -p Payload
+          cp -R build/Build/Products/Release-iphoneos/ForwardX.app Payload/
+          zip -qry ForwardX-unsigned.ipa Payload
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ForwardX-unsigned-ipa
+          path: ForwardX-unsigned.ipa
