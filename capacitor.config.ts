@@ -5,7 +5,7 @@ const config: CapacitorConfig = {
   appName: 'ForwardX',
   webDir: 'web',
   server: {
-    iosScheme: 'forwardx',
+    iosScheme: 'capacitor',
     cleartext: true,
   },
   ios: {
