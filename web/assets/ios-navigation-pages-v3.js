@@ -24,7 +24,7 @@
   const glyph={dashboard:'⌂',forward:'⇄',manage:'▦',me:'●',server:'▤',route:'⌁',arrows:'⇆',users:'♚',box:'◇',card:'▭',wallet:'◉',chart:'⌁',puzzle:'✣',key:'⌘',bell:'♢',globe:'◎',user:'●',store:'▣',receipt:'▧',settings:'⚙'};
   const virtual={forward:'#fx-forward',manage:'#fx-manage',me:'#fx-me'};
   let currentVirtual='';
-  function reactNavigate(path){ removeSection(); currentVirtual=''; history.pushState({},'',path); dispatchEvent(new PopStateEvent('popstate')); setTimeout(mark,80); }
+  function reactNavigate(path){ const parent=currentVirtual||sectionFromPath(); if(parent) sessionStorage.setItem('fx.ios.parent',parent); removeSection(); currentVirtual=''; history.pushState({},'',path); dispatchEvent(new PopStateEvent('popstate')); setTimeout(()=>{mark();backButton()},80); }
   function item(x){return `<button class="fx-page-item" data-path="${x[2]}"><span class="fx-page-icon">${glyph[x[3]]||'•'}</span><span class="fx-page-copy"><b>${x[0]}</b><small>${x[1]}</small></span><em>›</em></button>`}
   function showSection(kind,push=true){
     const g=groups[kind]; if(!g)return; currentVirtual=kind;
@@ -39,8 +39,26 @@
   function mark(){const p=location.pathname,k=currentVirtual||sectionFromPath()||(p==='/'?'dashboard':['/hosts','/tunnels','/rules','/forward-groups'].some(x=>p.startsWith(x))?'forward':p==='/settings'||p==='/profile'?'me':'manage');document.querySelectorAll('#fx-ios-tabbar button').forEach(x=>x.classList.toggle('active',x.dataset.tab===k))}
   function tab(kind){if(kind==='dashboard'){reactNavigate('/');return}showSection(kind)}
   function tabs(){if(document.getElementById('fx-ios-tabbar'))return;const nav=document.createElement('nav');nav.id='fx-ios-tabbar';nav.innerHTML=[['dashboard','仪表盘'],['forward','转发'],['manage','管理'],['me','我的']].map(x=>`<button data-tab="${x[0]}" aria-label="${x[1]}"><i></i><b>${x[1]}</b></button>`).join('')+'<i class="fx-tab-lens"></i>';document.body.appendChild(nav);nav.querySelectorAll('button').forEach(b=>b.onclick=()=>tab(b.dataset.tab));mark()}
-  function dashboardGrid(){if(location.pathname!=='/'||document.getElementById('fx-dashboard-grid'))return;const h=[...document.querySelectorAll('h1')].find(x=>x.textContent.trim()==='仪表盘');const host=h?.parentElement?.parentElement;if(!host)return;const box=document.createElement('div');box.id='fx-dashboard-grid';box.innerHTML=[['主机','/hosts','server'],['链路','/tunnels','route'],['规则','/rules','arrows'],['用户','/users','users'],['套餐','/plans','box'],['账单','/billing','wallet'],['插件','/plugins','puzzle'],['设置','/settings','settings']].map(x=>`<button data-path="${x[1]}"><span>${glyph[x[2]]}</span><b>${x[0]}</b></button>`).join('');host.insertAdjacentElement('afterend',box);box.querySelectorAll('button').forEach(b=>b.onclick=()=>reactNavigate(b.dataset.path))}
-  function routeChanged(){const s=sectionFromPath();if(s)showSection(s,false);else if(currentVirtual)removeSection(),currentVirtual='';mark();dashboardGrid()}
+  function dashboardGrid(){if(location.pathname!=='/'||document.getElementById('fx-dashboard-grid'))return;const h=[...document.querySelectorAll('h1')].find(x=>x.textContent.trim()==='仪表盘');const host=h?.parentElement?.parentElement;if(!host)return;const box=document.createElement('div');box.id='fx-dashboard-grid';box.innerHTML=[['主机','/hosts','server',''],['链路','/tunnels','route','fx-tunnel-shortcut'],['规则','/rules','arrows',''],['转发组','/forward-groups','route','fx-group-shortcut'],['用户','/users','users',''],['套餐','/plans','box',''],['账单','/billing','wallet',''],['设置','/settings','settings','']].map(x=>`<button class="${x[3]}" data-path="${x[1]}"><span>${glyph[x[2]]}</span><b>${x[0]}</b></button>`).join('');host.insertAdjacentElement('afterend',box);box.querySelectorAll('button').forEach(b=>b.onclick=()=>reactNavigate(b.dataset.path))}
+  function backButton(){
+    const parent=sessionStorage.getItem('fx.ios.parent'); let b=document.getElementById('fx-parent-back');
+    if(!parent||location.pathname==='/'||sectionFromPath()){b?.remove();return}
+    if(!b){b=document.createElement('button');b.id='fx-parent-back';document.body.appendChild(b)}
+    const label=parent==='forward'?'转发':parent==='manage'?'管理':'我的'; b.innerHTML=`<i>‹</i><span>${label}</span>`;
+    b.onclick=()=>{sessionStorage.removeItem('fx.ios.parent');showSection(parent)};
+  }
+  async function resourceVisibility(){
+    if(location.pathname!=='/')return;
+    const panel=localStorage.getItem('forwardx.mobile.panelUrl');const token=localStorage.getItem('forwardx.mobile.token');if(!panel||!token)return;
+    const query=async path=>{try{const r=await fetch(`${panel}/api/trpc/${path}?input=${encodeURIComponent(JSON.stringify({json:null}))}`,{headers:{Authorization:`Bearer ${token}`,'x-forwardx-mobile':'1'},credentials:'include'});const j=await r.json();return j?.result?.data?.json||[]}catch(_){return[]}};
+    const [tunnels,groups]=await Promise.all([query('tunnels.options'),query('forwardGroups.options')]);
+    const hasT=Array.isArray(tunnels)&&tunnels.length>0,hasG=Array.isArray(groups)&&groups.length>0;
+    document.documentElement.classList.toggle('fx-no-tunnels',!hasT);
+    document.documentElement.classList.toggle('fx-no-forward-groups',!hasG);
+    const hideCard=(title,hide)=>{const n=[...document.querySelectorAll('div,p,h1,h2,h3')].find(e=>e.textContent?.trim()===title);const card=n?.closest('[class*="rounded"], [class*="border"]');if(card)card.style.display=hide?'none':''};
+    hideCard('隧道流量',!hasT);hideCard('转发组流量',!hasG);
+  }
+  function routeChanged(){const s=sectionFromPath();if(s)showSection(s,false);else if(currentVirtual)removeSection(),currentVirtual='';mark();dashboardGrid();backButton();resourceVisibility()}
   function boot(){if(!isIOS())return;document.documentElement.classList.add('fx-ios-native','fx-nav-pages-v3');document.body.dataset.fxNavigation='pages-v3';tabs();routeChanged();new MutationObserver(()=>{tabs();if(!currentVirtual)dashboardGrid();mark()}).observe(document.getElementById('root')||document.body,{childList:true,subtree:true});addEventListener('popstate',()=>setTimeout(routeChanged,40))}
   document.readyState==='loading'?document.addEventListener('DOMContentLoaded',()=>setTimeout(boot,100)):setTimeout(boot,100);
 })();

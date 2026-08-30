@@ -36,7 +36,7 @@ final class NativeGlassTabBarController: CAPBridgeViewController {
         NSLayoutConstraint.activate([
             bar.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
             bar.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
-            bar.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -14),
+            bar.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: 8),
             bar.heightAnchor.constraint(equalToConstant: 66)
         ])
         stack.axis = .horizontal; stack.distribution = .fillEqually
