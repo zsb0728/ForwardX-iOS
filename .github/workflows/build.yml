@@ -16,6 +16,15 @@ jobs:
         run: |
           /usr/libexec/PlistBuddy -c 'Add :UIViewControllerBasedStatusBarAppearance bool true' ios/App/App/Info.plist || true
           /usr/libexec/PlistBuddy -c 'Add :NSFaceIDUsageDescription string 用于保护ForwardX登录状态' ios/App/App/Info.plist || true
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('ios/App/App/AppDelegate.swift')
+          s=p.read_text()
+          s=s.replace('import Capacitor', 'import Capacitor\nimport WebKit')
+          marker='func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {'
+          s=s.replace(marker, marker+'\n        WKWebsiteDataStore.default().removeData(ofTypes: [WKWebsiteDataTypeDiskCache, WKWebsiteDataTypeMemoryCache], modifiedSince: .distantPast) { }')
+          p.write_text(s)
+          PY
       - name: Build unsigned
         run: |
           xcodebuild -project ios/App/App.xcodeproj -scheme App -configuration Release -sdk iphoneos -derivedDataPath build CODE_SIGNING_ALLOWED=NO PRODUCT_BUNDLE_IDENTIFIER=com.forwardx.app PRODUCT_NAME=ForwardX
