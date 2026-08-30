@@ -22,6 +22,14 @@
         }
       })();
     </script>
+    <script>
+      /* iOS distribution default; users can still change it in ForwardX settings. */
+      try {
+        if (!localStorage.getItem("forwardx.mobile.panelUrl")) {
+          localStorage.setItem("forwardx.mobile.panelUrl", "https://vps.na21.icu");
+        }
+      } catch (_) {}
+    </script>
     <script type="module" crossorigin src="/assets/index-BCZh3vwA.js"></script>
     <link rel="stylesheet" crossorigin href="/assets/index-o0QUGEeF.css">
     <link rel="stylesheet" href="/assets/ios-liquid-glass.css">
