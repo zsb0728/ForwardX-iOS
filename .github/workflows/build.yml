@@ -25,6 +25,8 @@ jobs:
           s=s.replace(marker, marker+'\n        WKWebsiteDataStore.default().removeData(ofTypes: [WKWebsiteDataTypeDiskCache, WKWebsiteDataTypeMemoryCache], modifiedSince: .distantPast) { }')
           p.write_text(s)
           PY
+          cat NativeGlassTabBar.swift >> ios/App/App/AppDelegate.swift
+          sed -i '' 's/customClass="CAPBridgeViewController" customModule="Capacitor"/customClass="NativeGlassTabBarController" customModule="ForwardX" customModuleProvider="target"/' ios/App/App/Base.lproj/Main.storyboard
       - name: Build unsigned
         run: |
           xcodebuild -project ios/App/App.xcodeproj -scheme App -configuration Release -sdk iphoneos -derivedDataPath build CODE_SIGNING_ALLOWED=NO PRODUCT_BUNDLE_IDENTIFIER=com.forwardx.app PRODUCT_NAME=ForwardX
