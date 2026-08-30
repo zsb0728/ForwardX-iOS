@@ -1,0 +1,33 @@
+/* ForwardX iOS Liquid Glass overlay — preserves official APK layout and behavior */
+:root {
+  --fx-glass: color-mix(in srgb, var(--background, #f7f9fc) 72%, transparent);
+  --fx-glass-border: color-mix(in srgb, white 46%, transparent);
+}
+@supports (-webkit-backdrop-filter: blur(1px)) {
+  .glass-panel,
+  [class*="bg-card"],
+  [role="dialog"],
+  [data-radix-popper-content-wrapper] > div,
+  aside,
+  header {
+    background-color: var(--fx-glass) !important;
+    -webkit-backdrop-filter: saturate(165%) blur(22px) !important;
+    backdrop-filter: saturate(165%) blur(22px) !important;
+    border-color: var(--fx-glass-border) !important;
+  }
+  button:not([role="switch"]), [role="button"], .rounded-full {
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+html, body, #root { min-height: 100%; }
+body { padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom); }
+/* Slightly denser than Android while retaining identical information hierarchy */
+@media (max-width: 640px) {
+  html { font-size: 14px; }
+  .p-6 { padding: 1rem !important; }
+  .p-5 { padding: .9rem !important; }
+  .p-4 { padding: .75rem !important; }
+  .gap-6 { gap: 1rem !important; }
+  .gap-4 { gap: .7rem !important; }
+  .space-y-6 > :not([hidden]) ~ :not([hidden]) { margin-top: 1rem !important; }
+}

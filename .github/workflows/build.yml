@@ -1,4 +1,4 @@
-name: Build unsigned ForwardX IPA
+name: Build ForwardX iOS IPA
 on:
   workflow_dispatch:
   push:
@@ -8,17 +8,20 @@ jobs:
     runs-on: macos-26
     steps:
       - uses: actions/checkout@v4
-      - name: Install XcodeGen
-        run: brew install xcodegen
-      - name: Generate project
-        run: xcodegen generate
-      - name: Build unsigned app
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - run: npx cap add ios && npx cap sync ios
+      - name: Configure iOS
         run: |
-          xcodebuild -project ForwardX.xcodeproj -scheme ForwardX -configuration Release -sdk iphoneos -derivedDataPath build CODE_SIGNING_ALLOWED=NO
-          mkdir -p Payload
-          cp -R build/Build/Products/Release-iphoneos/ForwardX.app Payload/
+          /usr/libexec/PlistBuddy -c 'Add :UIViewControllerBasedStatusBarAppearance bool true' ios/App/App/Info.plist || true
+          /usr/libexec/PlistBuddy -c 'Add :NSFaceIDUsageDescription string 用于保护ForwardX登录状态' ios/App/App/Info.plist || true
+      - name: Build unsigned
+        run: |
+          xcodebuild -project ios/App/App.xcodeproj -scheme App -configuration Release -sdk iphoneos -derivedDataPath build CODE_SIGNING_ALLOWED=NO PRODUCT_BUNDLE_IDENTIFIER=com.forwardx.app PRODUCT_NAME=ForwardX
+          mkdir Payload
+          cp -R build/Build/Products/Release-iphoneos/App.app Payload/ForwardX.app
+          /usr/libexec/PlistBuddy -c 'Set :CFBundleDisplayName ForwardX' Payload/ForwardX.app/Info.plist
           zip -qry ForwardX-unsigned.ipa Payload
       - uses: actions/upload-artifact@v4
-        with:
-          name: ForwardX-unsigned-ipa
-          path: ForwardX-unsigned.ipa
+        with: { name: ForwardX-APK-UI-LiquidGlass, path: ForwardX-unsigned.ipa }
